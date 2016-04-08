@@ -1,0 +1,14 @@
+[paths]
+source =
+   src/mountebank
+   */site-packages/mountebank
+
+[run]
+branch = True
+source = mountebank
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*
