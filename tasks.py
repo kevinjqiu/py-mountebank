@@ -2,6 +2,6 @@ from invoke import task
 from tests.integration import harness
 
 
-start_imposter = task(harness.start_imposter)
+start_mb = task(harness.start_mb)
 
-stop_imposter = task(harness.stop_imposter)
+stop_mb = task(harness.stop_mb)

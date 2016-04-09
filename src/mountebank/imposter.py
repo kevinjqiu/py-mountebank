@@ -22,8 +22,7 @@ class Imposter(object):
         :param port: The port of the service
         :param specs: The specs the stubbed service should run on
         """
-        endpoint = '{}/imposters'.format(self._imposter_url)
-        response = requests.post(endpoint, json={
+        response = requests.post(self._imposter_url, json={
             'name': service_name,
             'port': port, 'protocol': protocol,
         })
@@ -34,7 +33,7 @@ class Imposter(object):
 
         :param port: The port number
         """
-        endpoint = '{}/imposters/{}'.format(self._imposter_url, port)
+        endpoint = '{}/{}'.format(self._imposter_url, port)
         response = requests.get(endpoint)
         response.raise_for_status()
         return response.json()

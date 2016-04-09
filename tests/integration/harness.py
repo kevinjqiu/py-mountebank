@@ -5,8 +5,8 @@ import retrying
 
 CONTAINER_NAME = 'mountebank-test'
 
-IMPOSTER_HOST = 'localhost'
-IMPOSTER_PORT = 2525
+MB_HOST = 'localhost'
+MB_PORT = 2525
 
 docker_client = docker.Client()
 
@@ -18,7 +18,7 @@ def wait_for_service_ready(url):
     return True
 
 
-def start_imposter(port=IMPOSTER_PORT, stubbed_ports=None):
+def start_mb(port=MB_PORT, stubbed_ports=None):
     print('starting {} on port {}'.format(CONTAINER_NAME, port))
     stubbed_ports = stubbed_ports or []
 
@@ -36,15 +36,15 @@ def start_imposter(port=IMPOSTER_PORT, stubbed_ports=None):
 
     if response and response['Id']:
         docker_client.start(container=response['Id'])
-        imposter_url = 'http://{}:{}'.format(IMPOSTER_HOST, port)
-        wait_for_service_ready(imposter_url)
+        mb_url = 'http://{}:{}'.format(MB_HOST, port)
+        wait_for_service_ready(mb_url)
         print('{} started on port {}'.format(CONTAINER_NAME, port))
-        return imposter_url
+        return mb_url
 
     return None
 
 
-def stop_imposter(port=IMPOSTER_PORT):
+def stop_mb(port=MB_PORT):
     print('stopping {} on port {}'.format(CONTAINER_NAME, port))
     docker_client.stop(CONTAINER_NAME)
     docker_client.remove_container(CONTAINER_NAME)

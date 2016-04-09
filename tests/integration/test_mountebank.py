@@ -1,18 +1,23 @@
 import pytest
 from docker import errors as docker_errors
-from mountebank import Imposter
+from mountebank import MountebankClient
 from tests.integration import harness
 
 
 def teardown_module(module):
-    harness.stop_imposter()
+    harness.stop_mb()
 
 
 @pytest.fixture(scope='module')
-def imposter_client():
-    imposter_url = harness.start_imposter(stubbed_ports=[65000])
-    assert imposter_url is not None
-    return Imposter(imposter_url)
+def mb_client():
+    mb_url = harness.start_mb(stubbed_ports=[65000])
+    assert mb_url is not None
+    return MountebankClient(mb_url)
+
+
+@pytest.fixture(scope='module')
+def imposter_client(mb_client):
+    return mb_client.imposter
 
 
 def test_imposter_create(imposter_client):
