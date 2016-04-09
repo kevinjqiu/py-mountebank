@@ -1,1 +1,4 @@
-pytest
+pytest==2.9.1
+docker-py==1.8.0
+invoke==0.12.2
+recheck==0.2.2
