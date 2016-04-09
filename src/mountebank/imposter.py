@@ -2,6 +2,21 @@ import requests
 from mountebank import exceptions
 
 
+class StubBuilder(object):
+    def __init__(self):
+        self._responses = []
+        self._predicates = []
+
+    def build(self):
+        assert self._responses
+        stub = {
+            'responses': self._responses,
+        }
+        if self._predicates:
+            stub['predicates'] = self._predicates
+        return stub
+
+
 class Imposter(object):
     """Mountebank Imposter API Client
 

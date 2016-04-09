@@ -8,10 +8,6 @@ def teardown_module(module):
     harness.stop_mb()
 
 
-def teardown_function(fn):
-    pass
-
-
 @pytest.fixture(scope='module')
 def mb_client():
     mb_url = harness.start_mb(stubbed_ports=[65000])
