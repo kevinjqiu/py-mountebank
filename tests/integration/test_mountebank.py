@@ -1,11 +1,15 @@
 import pytest
 from docker import errors as docker_errors
-from mountebank import MountebankClient
+from mountebank import MountebankClient, ImposterException
 from tests.integration import harness
 
 
 def teardown_module(module):
     harness.stop_mb()
+
+
+def teardown_function(fn):
+    pass
 
 
 @pytest.fixture(scope='module')
@@ -28,6 +32,13 @@ def test_imposter_create(imposter_client):
                                'protocol': 'http',
                                'port': 65000,
                            })
+
+
+def test_imposter_create_returns_error_if_already_stubbed(imposter_client):
+    imposter_client.delete(65000)
+    imposter_client.create('dummy', 'http', 65000)
+    with pytest.raises(ImposterException) as excinfo:
+        imposter_client.create('foobar', 'http', 65000)
 
 
 def assert_stubbed_service(imposter_client, port, expectations):

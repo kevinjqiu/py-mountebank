@@ -1,4 +1,5 @@
 import requests
+from mountebank import exceptions
 
 
 class Imposter(object):
@@ -10,6 +11,11 @@ class Imposter(object):
 
     def __init__(self, imposter_url):
         self._imposter_url = imposter_url
+
+    @staticmethod
+    def _raise_if_status_is_not(response, *expected_status_codes):
+        if response.status_code not in expected_status_codes:
+            raise exceptions.ImposterException(response)
 
     def create(self, service_name, protocol, port, **specs):
         """Create a stubbed service in mountebank
@@ -26,7 +32,8 @@ class Imposter(object):
             'name': service_name,
             'port': port, 'protocol': protocol,
         })
-        response.raise_for_status()
+        self._raise_if_status_is_not(response, 201)
+        return response
 
     def get_by_port(self, port):
         """Get the imposter created at the specified port
@@ -35,7 +42,17 @@ class Imposter(object):
         """
         endpoint = '{}/{}'.format(self._imposter_url, port)
         response = requests.get(endpoint)
-        response.raise_for_status()
+        self._raise_if_status_is_not(response, 200)
+        return response.json()
+
+    def delete(self, port):
+        """Delete the imposter created at the specified port
+
+        :param port: The port number
+        """
+        endpoint = '{}/{}'.format(self._imposter_url, port)
+        response = requests.delete(endpoint)
+        self._raise_if_status_is_not(response, 200)
         return response.json()
 
 
