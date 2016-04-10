@@ -35,16 +35,21 @@ class HTTPResponse(object):
         return result
 
 
+class Predicate(object):
+    """Represents a mountebank stub predicate
+    """
+    def __init__(self, operator, field_name, value):
+        self.operator = operator
+        self.field_name = field_name
+        self.value = value
+
+
 class PredicateBuilder(object):
     def __init__(self, field_name):
         self._field_name = field_name
 
     def __eq__(self, other):
-        return {
-            'equals': {
-                self._field_name: other
-            }
-        }
+        return Predicate('equals', self._field_name, other)
 
 
 class HTTPRequest(object):
@@ -59,14 +64,19 @@ class HTTPRequest(object):
 class StubBuilder(object):
     def __init__(self):
         self._responses = []
-        self._predicates = []
+        self._predicates = {}
 
     @property
     def response(self):
         return ResponseBuilder(self._responses)
 
     def when(self, *predicates):
-        self._predicates.extend(predicates)
+        for predicate in predicates:
+            if predicate.operator not in self._predicates:
+                self._predicates[predicate.operator] = {}
+            merged_predicate = self._predicates[predicate.operator]
+            merged_predicate[predicate.field_name] = predicate.value
+
         return self
 
     def build(self):
@@ -75,7 +85,9 @@ class StubBuilder(object):
             'responses': self._responses,
         }
         if self._predicates:
-            stub['predicates'] = self._predicates
+            stub['predicates'] = [
+                {k: v} for k, v in self._predicates.iteritems()
+            ]
         return stub
 
 
