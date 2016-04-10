@@ -1,10 +1,15 @@
 import pytest
-from mountebank.stub_builder import StubBuilder, HTTPResponse
+from mountebank.stub_builder import StubBuilder, HTTPResponse, HTTPRequest
 
 
 @pytest.fixture
 def stub_builder():
     return StubBuilder()
+
+
+def test_build_response_exception_when_no_response(stub_builder):
+    with pytest.raises(AssertionError):
+        stub_builder.build()
 
 
 def test_build_response_with_only_status_code(stub_builder):
@@ -41,3 +46,13 @@ def test_build_response_with_multiple_responses(stub_builder):
         }]
     }
     stub_builder.build()
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_predicate(stub_builder):
+    stub_builder.when(HTTPRequest.body == 'body') \
+        .response.is_(HTTPResponse(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [{'equals': {'body': 'body'}}],
+                'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()

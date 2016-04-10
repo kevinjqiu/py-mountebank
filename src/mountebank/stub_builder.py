@@ -31,8 +31,24 @@ class HTTPResponse(object):
             value = getattr(self, field)
             if value is not undefined:
                 json_field = self.MAPPINGS.get(field, field)
-                result[json_field] = self.status_code
+                result[json_field] = value
         return result
+
+
+class PredicateBuilder(object):
+    def __init__(self, field_name):
+        self._field_name = field_name
+
+    def __eq__(self, other):
+        return {
+            'equals': {
+                self._field_name: other
+            }
+        }
+
+
+class HTTPRequest(object):
+    body = PredicateBuilder('body')
 
 
 class StubBuilder(object):
@@ -44,8 +60,12 @@ class StubBuilder(object):
     def response(self):
         return ResponseBuilder(self._responses)
 
+    def when(self, predicate):
+        self._predicates.append(predicate)
+        return self
+
     def build(self):
-        assert self._responses
+        assert self._responses, 'A stub must have at least one response'
         stub = {
             'responses': self._responses,
         }
