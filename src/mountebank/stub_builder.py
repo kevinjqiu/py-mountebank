@@ -48,9 +48,12 @@ class PredicateBuilder(object):
 
 
 class HTTPRequest(object):
-    body = PredicateBuilder('body')
+    request_from = PredicateBuilder('requestFrom')
     path = PredicateBuilder('path')
+    query = PredicateBuilder('query')
     method = PredicateBuilder('method')
+    headers = PredicateBuilder('headers')
+    body = PredicateBuilder('body')
 
 
 class StubBuilder(object):
