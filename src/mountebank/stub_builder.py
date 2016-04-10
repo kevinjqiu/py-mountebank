@@ -49,6 +49,8 @@ class PredicateBuilder(object):
 
 class HTTPRequest(object):
     body = PredicateBuilder('body')
+    path = PredicateBuilder('path')
+    method = PredicateBuilder('method')
 
 
 class StubBuilder(object):
@@ -60,8 +62,8 @@ class StubBuilder(object):
     def response(self):
         return ResponseBuilder(self._responses)
 
-    def when(self, predicate):
-        self._predicates.append(predicate)
+    def when(self, *predicates):
+        self._predicates.extend(predicates)
         return self
 
     def build(self):

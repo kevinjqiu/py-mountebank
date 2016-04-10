@@ -50,9 +50,21 @@ def test_build_response_with_multiple_responses(stub_builder):
 
 
 def test_build_response_with_predicate(stub_builder):
-    stub_builder.when(HTTPRequest.body == 'body') \
+    stub_builder.when(HTTPRequest.body == 'OK') \
         .response.is_(HTTPResponse(status_code=200))
     stub_builder.build()
-    expected = {'predicates': [{'equals': {'body': 'body'}}],
+    expected = {'predicates': [{'equals': {'body': 'OK'}}],
+                'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_multiple_predicates(stub_builder):
+    stub_builder.when(
+        HTTPRequest.body == 'OK',
+        HTTPRequest.path == '/foo'
+    ).response.is_(HTTPResponse(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [{'equals': {'body': 'OK',
+                                           'path': '/foo'}}],
                 'responses': [{'is': {'statusCode': 200}}]}
     assert expected == stub_builder.build()
