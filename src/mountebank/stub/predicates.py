@@ -3,6 +3,12 @@ from collections import namedtuple
 
 Predicate = namedtuple('Predicate', ['operator', 'field_name', 'value'])
 
+Not = namedtuple('Not', ['predicate'])
+
+And = namedtuple('And', ['predicates'])
+
+Or = namedtuple('Or', ['predicates'])
+
 
 class PredicateBuilder(object):
     def __init__(self, field_name):
@@ -32,6 +38,18 @@ class PredicateBuilder(object):
     def exists(self, value):
         assert type(value) == bool, 'exists() must be called with True/False'
         return Predicate('exists', self._field_name, value)
+
+
+def not_(predicate):
+    return Not(predicate)
+
+
+def and_(*predicates):
+    return And(predicates)
+
+
+def or_(*predicates):
+    return Or(predicates)
 
 
 class HTTPRequest(object):
