@@ -1,5 +1,6 @@
 import pytest
-from mountebank.stub_builder import StubBuilder, HTTPResponse, HTTPRequest
+from mountebank import http_request
+from mountebank.stub_builder import StubBuilder, HTTPResponse
 
 
 @pytest.fixture
@@ -50,7 +51,7 @@ def test_build_response_with_multiple_responses(stub_builder):
 
 
 def test_build_response_with_predicate(stub_builder):
-    stub_builder.when(HTTPRequest.body == 'OK') \
+    stub_builder.when(http_request.body == 'OK') \
         .response.is_(HTTPResponse(status_code=200))
     stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK'}}],
@@ -60,8 +61,8 @@ def test_build_response_with_predicate(stub_builder):
 
 def test_build_response_with_multiple_predicates(stub_builder):
     stub_builder.when(
-        HTTPRequest.body == 'OK',
-        HTTPRequest.path == '/foo'
+        http_request.body == 'OK',
+        http_request.path == '/foo'
     ).response.is_(HTTPResponse(status_code=200))
     stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK',
@@ -72,8 +73,8 @@ def test_build_response_with_multiple_predicates(stub_builder):
 
 def test_build_response_with_multiple_different_predicates(stub_builder):
     stub_builder.when(
-        HTTPRequest.method == 'POST',
-        HTTPRequest.body.contains('duh')
+        http_request.method == 'POST',
+        http_request.body.contains('duh')
     ).response.is_(HTTPResponse(status_code=200))
     stub_builder.build()
     expected = {'predicates': [
