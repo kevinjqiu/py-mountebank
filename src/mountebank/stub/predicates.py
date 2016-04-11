@@ -20,17 +20,17 @@ class PredicateBuilder(object):
     def deep_equals(self, value):
         return Predicate('deepEquals', self._field_name, value)
 
-    def contains(self, other):
+    def contains(self, value):
         return Predicate('contains', self._field_name, value)
 
     def starts_with(self, value):
-        return Predicate('startsWith', self._field_name, value))
+        return Predicate('startsWith', self._field_name, value)
 
     def ends_with(self, value):
-        return Predicate('endsWith', self._field_name, value))
+        return Predicate('endsWith', self._field_name, value)
 
     def matches(self, value):
-        return Predicate('matches', self._field_name, value))
+        return Predicate('matches', self._field_name, value)
 
     def exists(self, value):
         assert type(value) == bool, 'exists() must be called with True/False'
