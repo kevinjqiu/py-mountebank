@@ -68,6 +68,7 @@ class HTTPRequest(object):
     method = PredicateBuilder('method')
     headers = PredicateBuilder('headers')
     body = PredicateBuilder('body')
+    inject = PredicateBuilder('inject')
 
 
 class StubBuilder(object):
