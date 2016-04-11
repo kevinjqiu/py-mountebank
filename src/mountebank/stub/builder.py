@@ -1,23 +1,18 @@
 from .response import ResponseBuilder
+from .predicates import Predicates
 
 
 class StubBuilder(object):
     def __init__(self):
         self._responses = []
-        self._predicates = {}
+        self._predicates = Predicates()
 
     @property
     def response(self):
         return ResponseBuilder(self._responses)
 
     def when(self, *predicates):
-        for predicate in predicates:
-            # TODO: build in knowledge of and, or, not
-            if predicate.operator not in self._predicates:
-                self._predicates[predicate.operator] = {}
-            merged_predicate = self._predicates[predicate.operator]
-            merged_predicate[predicate.field_name] = predicate.value
-
+        self._predicates.add_predicates(*predicates)
         return self
 
     def build(self):
@@ -25,8 +20,5 @@ class StubBuilder(object):
         stub = {
             'responses': self._responses,
         }
-        if self._predicates:
-            stub['predicates'] = [
-                {k: v} for k, v in self._predicates.iteritems()
-            ]
+        stub.update(self._predicates.json)
         return stub

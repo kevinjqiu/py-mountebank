@@ -10,6 +10,29 @@ And = namedtuple('And', ['predicates'])
 Or = namedtuple('Or', ['predicates'])
 
 
+class Predicates(object):
+    def __init__(self):
+        self._predicates = {}
+
+    def add_predicates(self, *predicates):
+        for predicate in predicates:
+            # TODO: build in knowledge of and, or, not
+            if predicate.operator not in self._predicates:
+                self._predicates[predicate.operator] = {}
+            merged_predicate = self._predicates[predicate.operator]
+            merged_predicate[predicate.field_name] = predicate.value
+
+    @property
+    def json(self):
+        if not self._predicates:
+            return {}
+
+        return {
+            'predicates': [
+                {k: v} for k, v in self._predicates.iteritems()]
+        }
+
+
 class PredicateBuilder(object):
     def __init__(self, field_name):
         self._field_name = field_name
