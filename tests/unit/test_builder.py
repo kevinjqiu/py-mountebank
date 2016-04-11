@@ -1,6 +1,6 @@
 import pytest
-from mountebank import http_request
-from mountebank.stub_builder import StubBuilder, HTTPResponse
+from mountebank import http_request, http_response
+from mountebank.stub.builder import StubBuilder
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def test_build_response_exception_when_no_response(stub_builder):
 
 
 def test_build_response_with_only_status_code(stub_builder):
-    stub_builder.response.is_(HTTPResponse(status_code=400))
+    stub_builder.response.is_(http_response(status_code=400))
     expected = {
         'responses': [{
             'is': {
@@ -27,9 +27,9 @@ def test_build_response_with_only_status_code(stub_builder):
 
 def test_build_response_with_multiple_responses(stub_builder):
     stub_builder.response \
-        .is_(HTTPResponse(status_code=400)) \
-        .is_(HTTPResponse(status_code=200,
-                          mode=HTTPResponse.Mode.TEXT,
+        .is_(http_response(status_code=400)) \
+        .is_(http_response(status_code=200,
+                          mode=http_response.Mode.TEXT,
                           body='OK',
                           headers={'Content-Type': 'text'}))
     expected = {
@@ -52,7 +52,7 @@ def test_build_response_with_multiple_responses(stub_builder):
 
 def test_build_response_with_predicate(stub_builder):
     stub_builder.when(http_request.body == 'OK') \
-        .response.is_(HTTPResponse(status_code=200))
+        .response.is_(http_response(status_code=200))
     stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK'}}],
                 'responses': [{'is': {'statusCode': 200}}]}
@@ -63,7 +63,7 @@ def test_build_response_with_multiple_predicates(stub_builder):
     stub_builder.when(
         http_request.body == 'OK',
         http_request.path == '/foo'
-    ).response.is_(HTTPResponse(status_code=200))
+    ).response.is_(http_response(status_code=200))
     stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK',
                                            'path': '/foo'}}],
@@ -75,7 +75,7 @@ def test_build_response_with_multiple_different_predicates(stub_builder):
     stub_builder.when(
         http_request.method == 'POST',
         http_request.body.contains('duh')
-    ).response.is_(HTTPResponse(status_code=200))
+    ).response.is_(http_response(status_code=200))
     stub_builder.build()
     expected = {'predicates': [
         {'contains': {'body': 'duh'}},
