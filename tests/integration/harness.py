@@ -3,6 +3,7 @@ import docker
 import retrying
 
 
+MOUNTEBANK_IMAGE_NAME = 'kevinjqiu/mountebank'
 CONTAINER_NAME = 'mountebank-test'
 
 MB_HOST = 'localhost'
@@ -30,8 +31,9 @@ def start_mb(port=MB_PORT, stubbed_ports=None):
     host_config = docker_client.create_host_config(
         port_bindings=port_bindings)
 
+    docker_client.pull(MOUNTEBANK_IMAGE_NAME)
     response = docker_client.create_container(
-        'kevinjqiu/mountebank', ports=[port, 27351, 27352],
+        MOUNTEBANK_IMAGE_NAME, ports=[port, 27351, 27352],
         name=CONTAINER_NAME, host_config=host_config)
 
     if response and response['Id']:
