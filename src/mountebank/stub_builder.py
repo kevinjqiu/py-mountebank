@@ -75,3 +75,6 @@ class ResponseBuilder(object):
             'is': response.json
         })
         return self
+
+    def proxy(self, response):
+        raise NotImplementedError()
