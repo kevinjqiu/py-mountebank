@@ -12,6 +12,7 @@ class StubBuilder(object):
 
     def when(self, *predicates):
         for predicate in predicates:
+            # TODO: build in knowledge of and, or, not
             if predicate.operator not in self._predicates:
                 self._predicates[predicate.operator] = {}
             merged_predicate = self._predicates[predicate.operator]
