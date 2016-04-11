@@ -129,5 +129,19 @@ def test_build_response_with_or_predicate(stub_builder):
 
 
 def test_build_response_with_nested_predicates(stub_builder):
-    # placeholder
-    pass
+    stub_builder.when(or_(http_request.method == 'POST',
+                          and_(
+                              http_request.path == '/begin',
+                              http_request.body.startswith('duh')))
+                      ).response.is_(http_response(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [
+        {'or': {'equals': {'method': 'POST'},
+                'and': {'equals': {'path': '/begin'},
+                        'startsWith': {'body': 'duh'}}
+
+                }
+         }
+    ],
+        'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
