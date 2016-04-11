@@ -20,10 +20,10 @@ class PredicateBuilder(object):
     def contains(self, value):
         return Predicate('contains', self._field_name, value)
 
-    def starts_with(self, value):
+    def startswith(self, value):
         return Predicate('startsWith', self._field_name, value)
 
-    def ends_with(self, value):
+    def endswith(self, value):
         return Predicate('endsWith', self._field_name, value)
 
     def matches(self, value):
