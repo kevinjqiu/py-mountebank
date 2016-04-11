@@ -49,7 +49,16 @@ class PredicateBuilder(object):
         self._field_name = field_name
 
     def __eq__(self, other):
+        return self.equals(other)
+
+    def equals(self, other):
         return Predicate('equals', self._field_name, other)
+
+    def deep_equals(self, other):
+        return Predicate('deepEquals', self._field_name, other)
+
+    def contains(self, other):
+        return Predicate('contains', self._field_name, other)
 
 
 class HTTPRequest(object):

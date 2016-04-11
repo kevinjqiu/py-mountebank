@@ -68,3 +68,16 @@ def test_build_response_with_multiple_predicates(stub_builder):
                                            'path': '/foo'}}],
                 'responses': [{'is': {'statusCode': 200}}]}
     assert expected == stub_builder.build()
+
+
+def test_build_response_with_multiple_different_predicates(stub_builder):
+    stub_builder.when(
+        HTTPRequest.method == 'POST',
+        HTTPRequest.body.contains('duh')
+    ).response.is_(HTTPResponse(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [
+        {'contains': {'body': 'duh'}},
+        {'equals': {'method': 'POST'}}],
+        'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
