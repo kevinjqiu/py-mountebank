@@ -3,11 +3,11 @@ from collections import namedtuple
 
 Predicate = namedtuple('Predicate', ['operator', 'field_name', 'value'])
 
-Not = namedtuple('Not', ['predicate'])
+_Not = namedtuple('_Not', ['operator', 'predicate'])
 
-And = namedtuple('And', ['predicates'])
+_And = namedtuple('_And', ['operator', 'predicates'])
 
-Or = namedtuple('Or', ['predicates'])
+_Or = namedtuple('_Or', ['operator', 'predicates'])
 
 
 class Predicates(object):
@@ -64,15 +64,15 @@ class PredicateBuilder(object):
 
 
 def not_(predicate):
-    return Not(predicate)
+    return _Not('not', predicate)
 
 
 def and_(*predicates):
-    return And(predicates)
+    return _And('and', predicates)
 
 
 def or_(*predicates):
-    return Or(predicates)
+    return _Or('or', predicates)
 
 
 class HTTPRequest(object):
