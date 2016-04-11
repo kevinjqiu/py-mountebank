@@ -1,10 +1,7 @@
-class Predicate(object):
-    """Represents a mountebank stub predicate
-    """
-    def __init__(self, operator, field_name, value):
-        self.operator = operator
-        self.field_name = field_name
-        self.value = value
+from collections import namedtuple
+
+
+Predicate = namedtuple('Predicate', ['operator', 'field_name', 'value'])
 
 
 class PredicateBuilder(object):
