@@ -1,5 +1,5 @@
 import pytest
-from mountebank import http_request, http_response
+from mountebank import http_request, http_response, not_, and_, or_
 from mountebank.stub.builder import StubBuilder
 
 
@@ -82,3 +82,52 @@ def test_build_response_with_multiple_different_predicates(stub_builder):
         {'equals': {'method': 'POST'}}],
         'responses': [{'is': {'statusCode': 200}}]}
     assert expected == stub_builder.build()
+
+
+def test_build_response_with_not_predicate(stub_builder):
+    stub_builder.when(not_(http_request.method == 'POST')) \
+        .response.is_(http_response(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [
+        {'not': {'equals': {'method': 'POST'}}}],
+        'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_and_predicate(stub_builder):
+    stub_builder.when(and_(http_request.method == 'POST',
+                           http_request.path == '/begin',
+                           http_request.body.startswith('duh'))
+                      ).response.is_(http_response(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [
+        {'and': {'equals': {'method': 'POST',
+                            'path': '/begin'},
+                 'startsWith': {'body': 'duh'}
+                 }
+         }
+    ],
+        'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_or_predicate(stub_builder):
+    stub_builder.when(or_(http_request.method == 'POST',
+                           http_request.path == '/begin',
+                           http_request.body.startswith('duh'))
+                      ).response.is_(http_response(status_code=200))
+    stub_builder.build()
+    expected = {'predicates': [
+        {'or': {'equals': {'method': 'POST',
+                            'path': '/begin'},
+                 'startsWith': {'body': 'duh'}
+                 }
+         }
+    ],
+        'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_nested_predicates(stub_builder):
+    # placeholder
+    pass
