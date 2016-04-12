@@ -37,13 +37,14 @@ class HTTPResponse(object):
 
 
 class ResponseBuilder(object):
-    def __init__(self, responses):
+    def __init__(self, responses, stub_builder):
         self._responses = responses
+        self._stub_builder = stub_builder
 
     def is_(self, *responses):
         self._responses.extend(
             [{'is': response.json} for response in responses])
-        return self
+        return self._stub_builder
 
     def proxy(self, response):
         raise NotImplementedError()

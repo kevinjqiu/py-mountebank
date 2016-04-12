@@ -27,7 +27,7 @@ class Imposter(object):
         if response.status_code not in expected_status_codes:
             raise exceptions.ImposterException(response)
 
-    def create(self, service_name, protocol, port, **specs):
+    def create(self, service_name, protocol, port, stubs=None):
         """Create a stubbed service in mountebank
 
         :param service_name: The name of the service
@@ -38,10 +38,13 @@ class Imposter(object):
         :param port: The port of the service
         :param specs: The specs the stubbed service should run on
         """
-        response = requests.post(self._imposter_url, json={
+        payload = {
             'name': service_name,
             'port': port, 'protocol': protocol,
-        })
+        }
+        if stubs:
+            payload['stubs'] = stubs
+        response = requests.post(self._imposter_url, json=payload)
         self._raise_if_status_is_not(response, 201)
         return response
 

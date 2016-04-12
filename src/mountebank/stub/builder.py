@@ -9,7 +9,7 @@ class StubBuilder(object):
 
     @property
     def response(self):
-        return ResponseBuilder(self._responses)
+        return ResponseBuilder(self._responses, self)
 
     def when(self, *predicates):
         self._predicates.set_predicates(*predicates)

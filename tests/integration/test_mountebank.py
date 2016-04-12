@@ -1,3 +1,4 @@
+import requests
 import pytest
 from docker import errors as docker_errors
 from mountebank import (
@@ -40,18 +41,41 @@ def test_imposter_create_returns_error_if_already_stubbed(imposter_client):
 
 def test_imposter_create_with_spec(imposter_client):
     imposter_client.delete(65000)
-    stub_builder = imposter_client.new_stub_builder()
-    stub_builder.when(http_request.method == 'POST',
-                      http_request.path == '/customers/123') \
-        .response.is_(
-            http_response(status_code=201,
-                          headers={
-                              'Location': 'http://localhost:4545/customers/123',
-                              'Content-Type': 'application/xml'},
-                          body='<customer><email>customer@test.com</email></customer>'
-                          ))
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.method == 'POST',
+              http_request.path == '/customers/123')
+        .response
+        .is_(http_response(status_code=201,
+                           headers={
+                               'Location': 'http://localhost:65000/customers/123',
+                               'Content-Type': 'application/xml'},
+                           body='<customer><email>customer@test.com</email></customer>'),
+             http_response(status_code=400,
+                           headers={
+                               'Content-Type': 'application/xml'},
+                           body='<error>email already exists</error>')
+        ).build())
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .response.is_(http_response(status_code=404))
+        .build())
 
-    imposter_client.create('sample', 'http', 65000, **stubs)
+    imposter_client.create('sample', 'http', 65000, stubs=stubs)
+
+    response = requests.post('http://localhost:65000/customers/123', data={})
+    assert response.status_code == 201
+    assert response.headers['Content-Type'] == 'application/xml'
+    assert 'customer@test.com' in response.text
+
+    response = requests.post('http://localhost:65000/customers/123', data={})
+    assert response.status_code == 400
+    assert response.headers['Content-Type'] == 'application/xml'
+    assert 'email already exists' in response.text
+
+    response = requests.get('http://localhost:65000/customers/999')
+    assert response.status_code == 404
 
 
 def assert_stubbed_service(imposter_client, port, expectations):
