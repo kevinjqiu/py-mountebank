@@ -1,13 +1,13 @@
 from collections import namedtuple
 
 
-Predicate = namedtuple('Predicate', ['operator', 'field_name', 'value'])
+_Predicate = namedtuple('_Predicate', ['operator', 'field_name', 'value'])
 
-_Not = namedtuple('_Not', ['operator', 'predicate'])
 
-_And = namedtuple('_And', ['operator', 'predicates'])
+_HighOrderPredicate = namedtuple('HighOrder_Predicate', ['operator', 'operands', 'arity'])
 
-_Or = namedtuple('_Or', ['operator', 'predicates'])
+
+_arity = namedtuple('_arity', ['ONE', 'MULTI'])('ONE', 'MULTI')
 
 
 class Predicates(object):
@@ -16,7 +16,6 @@ class Predicates(object):
 
     def add_predicates(self, *predicates):
         for predicate in predicates:
-            # TODO: build in knowledge of and, or, not
             if predicate.operator not in self._predicates:
                 self._predicates[predicate.operator] = {}
             merged_predicate = self._predicates[predicate.operator]
@@ -41,38 +40,38 @@ class PredicateBuilder(object):
         return self.equals(value)
 
     def equals(self, value):
-        return Predicate('equals', self._field_name, value)
+        return _Predicate('equals', self._field_name, value)
 
     def deep_equals(self, value):
-        return Predicate('deepEquals', self._field_name, value)
+        return _Predicate('deepEquals', self._field_name, value)
 
     def contains(self, value):
-        return Predicate('contains', self._field_name, value)
+        return _Predicate('contains', self._field_name, value)
 
     def startswith(self, value):
-        return Predicate('startsWith', self._field_name, value)
+        return _Predicate('startsWith', self._field_name, value)
 
     def endswith(self, value):
-        return Predicate('endsWith', self._field_name, value)
+        return _Predicate('endsWith', self._field_name, value)
 
     def matches(self, value):
-        return Predicate('matches', self._field_name, value)
+        return _Predicate('matches', self._field_name, value)
 
     def exists(self, value):
         assert type(value) == bool, 'exists() must be called with True/False'
-        return Predicate('exists', self._field_name, value)
+        return _Predicate('exists', self._field_name, value)
 
 
 def not_(predicate):
-    return _Not('not', predicate)
+    return _HighOrderPredicate('not', [predicate], _arity.ONE)
 
 
 def and_(*predicates):
-    return _And('and', predicates)
+    return _HighOrderPredicate('and', predicates, _arity.MULTI)
 
 
 def or_(*predicates):
-    return _Or('or', predicates)
+    return _HighOrderPredicate('or', predicates, _arity.MULTI)
 
 
 class HTTPRequest(object):
