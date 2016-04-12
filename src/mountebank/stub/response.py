@@ -1,5 +1,4 @@
 from collections import namedtuple
-from mountebank.predicates import PredicateBuilder
 
 
 class _Sentinel(object):
