@@ -14,12 +14,25 @@ class Predicates(object):
     def __init__(self):
         self._predicates = {}
 
+    @staticmethod
+    def _handle_normal_predicate(merged_predicate, predicate):
+        merged_predicate[predicate.field_name] = predicate.value
+
+    @staticmethod
+    def _handle_high_order_predicate(merged_predicate, predicate):
+        pass
+
     def add_predicates(self, *predicates):
         for predicate in predicates:
             if predicate.operator not in self._predicates:
                 self._predicates[predicate.operator] = {}
             merged_predicate = self._predicates[predicate.operator]
-            merged_predicate[predicate.field_name] = predicate.value
+            if isinstance(predicate, _Predicate):
+                self._handle_normal_predicate(merged_predicate, predicate)
+            elif isinstance(predicate, _HighOrderPredicate):
+                self._handle_high_order_predicate(merged_predicate, predicate)
+            else:
+                assert False, 'Argument must be of type Predicate or HighOrderPredicate'
 
     @property
     def json(self):
