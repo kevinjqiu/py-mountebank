@@ -81,7 +81,8 @@ def test_build_response_with_multiple_different_predicates(stub_builder):
         {'contains': {'body': 'duh'}},
         {'equals': {'method': 'POST'}}],
         'responses': [{'is': {'statusCode': 200}}]}
-    assert sorted(expected['predicates']) == sorted(stub_builder.build()['predicates'])
+    assert sorted(expected['predicates']) == \
+        sorted(stub_builder.build()['predicates'])
 
 
 def test_build_response_with_not_predicate(stub_builder):
