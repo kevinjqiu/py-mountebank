@@ -16,7 +16,7 @@ class HTTPResponse(object):
     MAPPINGS = {'status_code': 'statusCode',
                 'mode': '_mode'}
 
-    __slot__ = ['status_code', 'headers', 'body', 'mode']
+    __slots__ = ['status_code', 'headers', 'body', 'mode']
 
     def __init__(self, status_code, headers=undefined,
                  body=undefined, mode=undefined):
