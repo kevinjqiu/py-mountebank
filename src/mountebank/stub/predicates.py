@@ -14,25 +14,34 @@ class Predicates(object):
     def __init__(self):
         self._predicates = {}
 
-    @staticmethod
-    def _handle_normal_predicate(merged_predicate, predicate):
-        merged_predicate[predicate.field_name] = predicate.value
+    @classmethod
+    def _handle_normal_predicate(cls, merged_predicate, predicate):
+        return {predicate.field_name: predicate.value}
 
-    @staticmethod
-    def _handle_high_order_predicate(merged_predicate, predicate):
-        pass
+    @classmethod
+    def _handle_high_order_predicate(cls, merged_predicate, predicate):
+        return cls._merge_predicates(predicate.operands)
 
-    def add_predicates(self, *predicates):
+    @classmethod
+    def _merge_predicates(cls, predicates):
+        retval = {}
         for predicate in predicates:
-            if predicate.operator not in self._predicates:
-                self._predicates[predicate.operator] = {}
-            merged_predicate = self._predicates[predicate.operator]
+            if predicate.operator not in retval:
+                retval[predicate.operator] = {}
+
+            merged_predicate = retval[predicate.operator]
             if isinstance(predicate, _Predicate):
-                self._handle_normal_predicate(merged_predicate, predicate)
+                merged_predicate.update(cls._handle_normal_predicate(
+                    merged_predicate, predicate))
             elif isinstance(predicate, _HighOrderPredicate):
-                self._handle_high_order_predicate(merged_predicate, predicate)
+                merged_predicate.update(cls._handle_high_order_predicate(
+                    merged_predicate, predicate))
             else:
                 assert False, 'Argument must be of type Predicate or HighOrderPredicate'
+        return retval
+
+    def add_predicates(self, *predicates):
+        self._predicates = self._merge_predicates(predicates)
 
     @property
     def json(self):
