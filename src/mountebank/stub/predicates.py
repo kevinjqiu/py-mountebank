@@ -40,7 +40,7 @@ class Predicates(object):
                 assert False, 'Argument must be of type Predicate or HighOrderPredicate'
         return retval
 
-    def add_predicates(self, *predicates):
+    def set_predicates(self, *predicates):
         self._predicates = self._merge_predicates(predicates)
 
     @property

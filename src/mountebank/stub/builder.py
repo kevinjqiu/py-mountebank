@@ -12,7 +12,7 @@ class StubBuilder(object):
         return ResponseBuilder(self._responses)
 
     def when(self, *predicates):
-        self._predicates.add_predicates(*predicates)
+        self._predicates.set_predicates(*predicates)
         return self
 
     def build(self):
