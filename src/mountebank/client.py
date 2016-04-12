@@ -1,5 +1,6 @@
 import requests
 from mountebank import exceptions
+from mountebank.stub.builder import StubBuilder
 
 
 class MountebankClient(object):
@@ -63,3 +64,8 @@ class Imposter(object):
         response = requests.delete(endpoint)
         self._raise_if_status_is_not(response, 200)
         return response.json()
+
+    def new_stub_builder(self):
+        """Returns an instance of StubBuilder
+        """
+        return StubBuilder()

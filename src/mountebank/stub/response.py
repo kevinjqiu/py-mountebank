@@ -40,10 +40,9 @@ class ResponseBuilder(object):
     def __init__(self, responses):
         self._responses = responses
 
-    def is_(self, response):
-        self._responses.append({
-            'is': response.json
-        })
+    def is_(self, *responses):
+        self._responses.extend(
+            [{'is': response.json} for response in responses])
         return self
 
     def proxy(self, response):

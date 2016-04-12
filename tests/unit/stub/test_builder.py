@@ -27,11 +27,11 @@ def test_build_response_with_only_status_code(stub_builder):
 
 def test_build_response_with_multiple_responses(stub_builder):
     stub_builder.response \
-        .is_(http_response(status_code=400)) \
-        .is_(http_response(status_code=200,
-                          mode=http_response.Mode.TEXT,
-                          body='OK',
-                          headers={'Content-Type': 'text'}))
+        .is_(http_response(status_code=400),
+             http_response(status_code=200,
+                           mode=http_response.Mode.TEXT,
+                           body='OK',
+                           headers={'Content-Type': 'text'}))
     expected = {
         'responses': [{
             'is': {
