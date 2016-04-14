@@ -96,10 +96,15 @@ def or_(*predicates):
     return _HighOrderPredicate('or', predicates, _arity.MULTI)
 
 
-class HTTPRequest(object):
+class http_request(object):
     request_from = PredicateBuilder('requestFrom')
     path = PredicateBuilder('path')
     query = PredicateBuilder('query')
     method = PredicateBuilder('method')
     headers = PredicateBuilder('headers')
     body = PredicateBuilder('body')
+
+
+class tcp_request(object):
+    request_from = PredicateBuilder('requestFrom')
+    data = PredicateBuilder('data')

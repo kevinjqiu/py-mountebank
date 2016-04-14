@@ -9,7 +9,7 @@ class _Sentinel(object):
 undefined = _Sentinel()
 
 
-class HTTPResponse(object):
+class http_response(object):
     Mode = namedtuple('Mode', 'BINARY TEXT')('binary', 'text')
 
     MAPPINGS = {'status_code': 'statusCode',
@@ -33,6 +33,15 @@ class HTTPResponse(object):
                 json_field = self.MAPPINGS.get(field, field)
                 result[json_field] = value
         return result
+
+
+class tcp_response(object):
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def json(self):
+        return {'data': self.data}
 
 
 class ResponseBuilder(object):

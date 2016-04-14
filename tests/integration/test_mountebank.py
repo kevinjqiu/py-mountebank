@@ -2,12 +2,34 @@ import requests
 import pytest
 from docker import errors as docker_errors
 from mountebank import (
-    MountebankClient, ImposterException, http_request, http_response)
+    MountebankClient, ImposterException,
+    http_request, http_response,
+    tcp_request, tcp_response,
+)
 from tests.integration import harness
 
 
 def teardown_module(module):
     harness.stop_mb()
+
+
+@pytest.fixture()
+def socket_factory():
+    import socket
+    class _SocketFactory(object):
+        def __init__(self, host, port):
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._socket.connect((host, port))
+
+        def __del__(self):
+            self._socket.shutdown()
+            self._socket.close()
+
+        def send_and_recv(self, msg):
+            self._socket.send(msg)
+            return self._socket.recv(255)
+
+    return _SocketFactory
 
 
 @pytest.fixture(scope='module')
@@ -166,31 +188,35 @@ def test_imposter_with_deep_equals_predicate(imposter_client):
     assert response.text == ''
 
 
-def test_imposter_with_contains_predicate(imposter_client):
+def test_imposter_with_contains_predicate(imposter_client, socket_factory):
     imposter_client.delete(65000)
     stubs = []
     stubs.append(
         imposter_client.new_stub_builder()
         .when(tcp_request.data.contains('AgM='))
-        .response.is_(tcp_response(body='Zmlyc3QgcmVzcG9uc2U='))
+        .response.is_(tcp_response('Zmlyc3QgcmVzcG9uc2U='))
         .build()
     )
 
     stubs.append(
         imposter_client.new_stub_builder()
         .when(tcp_request.data.contains('Bwg='))
-        .response.is_(tcp_response(body='c2Vjb25kIHJlc3BvbnNl'))
+        .response.is_(tcp_response('c2Vjb25kIHJlc3BvbnNl'))
         .build()
     )
 
     stubs.append(
         imposter_client.new_stub_builder()
         .when(tcp_request.data.contains('Bwg='))
-        .response.is_(tcp_response(body='dGhpcmQgcmVzcG9uc2U='))
+        .response.is_(tcp_response('dGhpcmQgcmVzcG9uc2U='))
         .build()
     )
 
     imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
+
+    new_socket = lambda: socket_factory('localhost', 65000)
+    assert 'Zmlyc3QgcmVzcG9uc2U=' == new_socket().send_and_recv('__AgM=__')
+    assert 'c2Vjb25kIHJlc3BvbnNl' == new_socket().send_and_recv('__Bwg=__')
 
 
 def assert_stubbed_service(imposter_client, port, expectations):
