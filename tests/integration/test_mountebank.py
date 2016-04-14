@@ -214,9 +214,39 @@ def test_imposter_with_contains_predicate(imposter_client, socket_factory):
 
     imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
 
-    new_socket = lambda: socket_factory('localhost', 65000)
-    assert 'Zmlyc3QgcmVzcG9uc2U=' == new_socket().send_and_recv('__AgM=__')
-    assert 'c2Vjb25kIHJlc3BvbnNl' == new_socket().send_and_recv('__Bwg=__')
+    socket = socket_factory('localhost', 65000)
+    assert 'Zmlyc3QgcmVzcG9uc2U=' == socket.send_and_recv('__AgM=__')
+    assert 'c2Vjb25kIHJlc3BvbnNl' == socket.send_and_recv('__Bwg=__')
+
+
+def test_imposter_with_starts_with_predicate(imposter_client, socket_factory):
+    imposter_client.delete(65000)
+
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.startswith('first'))
+        .response.is_(tcp_response('first response'))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.startswith('second'))
+        .response.is_(tcp_response('second response'))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.startswith('second'))
+        .response.is_(tcp_response('third response'))
+        .build()
+    )
+
+    imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
+
+    socket = socket_factory('localhost', 65000)
+    assert 'first response' == socket.send_and_recv('FIRST REQUEST')
+    assert 'second response' == socket.send_and_recv('Second Request')
 
 
 def assert_stubbed_service(imposter_client, port, expectations):
