@@ -127,6 +127,45 @@ def test_imposter_with_equals_predicate(imposter_client):
     assert response.status_code == 405
 
 
+def test_imposter_with_deep_equals_predicate(imposter_client):
+    imposter_client.delete(65000)
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.query.deep_equals({}))
+        .response.is_(http_response(status_code=200, body='first'))
+        .build()
+    )
+
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.query.deep_equals({'first': '1'}))
+        .response.is_(http_response(status_code=200, body='second'))
+        .build()
+    )
+
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.query.deep_equals({'first': '1', 'second': '2'}))
+        .response.is_(http_response(status_code=200, body='third'))
+        .build()
+    )
+
+    imposter_client.create('sample', 'http', 65000, stubs=stubs)
+
+    response = requests.get('http://localhost:65000/test')
+    assert response.text == 'first'
+
+    response = requests.get('http://localhost:65000/test?First=1')
+    assert response.text == 'second'
+
+    response = requests.get('http://localhost:65000/test?Second=2&First=1')
+    assert response.text == 'third'
+
+    response = requests.get('http://localhost:65000/test?Second=2&First=1&Third=3')
+    assert response.text == ''
+
+
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
     for key, value in expectations.iteritems():
