@@ -78,6 +78,55 @@ def test_imposter_create_with_spec(imposter_client):
     assert response.status_code == 404
 
 
+def test_imposter_with_equals_predicate(imposter_client):
+    imposter_client.delete(65000)
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.method == 'POST',
+              http_request.path == '/test',
+              http_request.query == {'first': '1', 'second': '2'},
+              http_request.headers == {'Accept': 'text/plain'})
+        .response.is_(http_response(status_code=400))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.headers == {'Accept': 'application/xml'})
+        .response.is_(http_response(status_code=406))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.method == 'PUT')
+        .response.is_(http_response(status_code=405))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.method == 'PUT')
+        .response.is_(http_response(status_code=500))
+        .build()
+    )
+
+    imposter_client.create('sample', 'http', 65000, stubs=stubs)
+
+    response = requests.post('http://localhost:65000/test?First=1&Second=2',
+                             headers={'accept': 'text/plain'},
+                             data='hello, world!')
+    assert response.status_code == 400
+
+    response = requests.post('http://localhost:65000/test?First=1&Second=2',
+                             headers={'accept': 'application/xml'},
+                             data='hello, world!')
+    assert response.status_code == 406
+
+    response = requests.put('http://localhost:65000/test?First=1&Second=2',
+                            headers={'accept': 'application/json'},
+                            data='hello, world!')
+    assert response.status_code == 405
+
+
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
     for key, value in expectations.iteritems():
