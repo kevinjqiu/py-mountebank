@@ -166,6 +166,33 @@ def test_imposter_with_deep_equals_predicate(imposter_client):
     assert response.text == ''
 
 
+def test_imposter_with_contains_predicate(imposter_client):
+    imposter_client.delete(65000)
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.contains('AgM='))
+        .response.is_(tcp_response(body='Zmlyc3QgcmVzcG9uc2U='))
+        .build()
+    )
+
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.contains('Bwg='))
+        .response.is_(tcp_response(body='c2Vjb25kIHJlc3BvbnNl'))
+        .build()
+    )
+
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.contains('Bwg='))
+        .response.is_(tcp_response(body='dGhpcmQgcmVzcG9uc2U='))
+        .build()
+    )
+
+    imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
+
+
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
     for key, value in expectations.iteritems():
