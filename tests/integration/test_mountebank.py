@@ -283,6 +283,37 @@ def test_imposter_with_ends_with_predicate(imposter_client, socket_factory):
     assert 'second response' == socket.send_and_recv('AQIDBAUGBQY=')
 
 
+def test_imposter_with_matches_predicate(imposter_client, socket_factory):
+    imposter_client.delete(65000)
+
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.matches('^first\Wsecond'))
+        .response.is_(tcp_response('first response'))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.matches('^second\s+request'))
+        .response.is_(tcp_response('second response'))
+        .build()
+    )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(tcp_request.data.matches('^second\s+request'))
+        .response.is_(tcp_response('third response'))
+        .build()
+    )
+
+    imposter_client.create('sample', 'tcp', 65000, {'mode': 'text'},
+                           stubs=stubs)
+
+    socket = socket_factory('localhost', 65000)
+    assert 'first response' == socket.send_and_recv('first second')
+    assert 'second response' == socket.send_and_recv('second request')
+
+
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
     for key, value in six.iteritems(expectations):
