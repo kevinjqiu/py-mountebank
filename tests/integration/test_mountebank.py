@@ -275,7 +275,8 @@ def test_imposter_with_ends_with_predicate(imposter_client, socket_factory):
         .build()
     )
 
-    imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
+    imposter_client.create('sample', 'tcp', 65000,
+                           {'mode': 'text'}, stubs=stubs)
 
     socket = socket_factory('localhost', 65000)
     assert 'first response' == socket.send_and_recv('AQIDBA==AwQ=')

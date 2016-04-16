@@ -27,7 +27,8 @@ class Imposter(object):
         if response.status_code not in expected_status_codes:
             raise exceptions.ImposterException(response)
 
-    def create(self, service_name, protocol, port, stubs=None):
+    def create(self, service_name, protocol, port, other_props=None,
+               stubs=None):
         """Create a stubbed service in mountebank
 
         :param service_name: The name of the service
@@ -36,12 +37,21 @@ class Imposter(object):
                          that mountebank supports,
                          e.g., http, https, tcp, smtp
         :param port: The port of the service
+        :param other_props: Other properties the imposter should have.
+                            They are protocol-specific.
+                            Please check:
+                                http://www.mbtest.org/docs/protocols/http
+                                http://www.mbtest.org/docs/protocols/https
+                                http://www.mbtest.org/docs/protocols/tcp
+                                http://www.mbtest.org/docs/protocols/smtp
         :param specs: The specs the stubbed service should run on
         """
         payload = {
             'name': service_name,
             'port': port, 'protocol': protocol,
         }
+        if other_props:
+            payload.update(other_props)
         if stubs:
             payload['stubs'] = stubs
         response = requests.post(self._imposter_url, json=payload)
