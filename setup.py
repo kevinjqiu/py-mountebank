@@ -23,7 +23,7 @@ def read(*names, **kwargs):
 
 
 setup(
-    name='mountebank',
+    name='pymountebank',
     version='0.1.1',
     license='BSD',
     description='Mountebank for Python Developers',
