@@ -314,6 +314,36 @@ def test_imposter_with_matches_predicate(imposter_client, socket_factory):
     assert 'second response' == socket.send_and_recv('second request')
 
 
+# def test_imposter_with_exists_predicate(imposter_client):
+#     imposter_client.delete(65000)
+
+#     stubs = []
+#     stubs.append(
+#         imposter_client.new_stub_builder()
+#         .when(http_request.query.exists('q'),
+#               http_request.query.exists('search'))
+#         .response.is_(http_response(200, headers={'Accept': true,
+#                                                   'X-Rate-Limit': false}))
+#         .build()
+#     )
+
+#     stubs.append(
+#         imposter_client.new_stub_builder()
+#         .when(http_request.query.exists('method'),
+#               http_request.query.exists('search'))
+#         .response.is_(http_response(200, headers={'Accept': true,
+#                                                   'X-Rate-Limit': false}))
+#         .build()
+#     )
+
+#     imposter_client.create('sample', 'tcp', 65000, {'mode': 'text'},
+#                            stubs=stubs)
+
+#     socket = socket_factory('localhost', 65000)
+#     assert 'first response' == socket.send_and_recv('first second')
+#     assert 'second response' == socket.send_and_recv('second request')
+
+
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
     for key, value in six.iteritems(expectations):
