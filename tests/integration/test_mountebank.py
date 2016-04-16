@@ -22,6 +22,7 @@ def socket_factory():
         def __init__(self, host, port):
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.connect((host, port))
+            self._socket.settimeout(5)
 
         def __del__(self):
             self._socket.shutdown()
@@ -263,13 +264,13 @@ def test_imposter_with_ends_with_predicate(imposter_client, socket_factory):
     )
     stubs.append(
         imposter_client.new_stub_builder()
-        .when(tcp_request.data.startswith('BQY='))
+        .when(tcp_request.data.endswith('BQY='))
         .response.is_(tcp_response('second response'))
         .build()
     )
     stubs.append(
         imposter_client.new_stub_builder()
-        .when(tcp_request.data.startswith('BQY='))
+        .when(tcp_request.data.endswith('BQY='))
         .response.is_(tcp_response('third response'))
         .build()
     )
@@ -277,8 +278,8 @@ def test_imposter_with_ends_with_predicate(imposter_client, socket_factory):
     imposter_client.create('sample', 'tcp', 65000, stubs=stubs)
 
     socket = socket_factory('localhost', 65000)
-    assert 'first response' == socket.send_and_recv('AQIDBA==')
-    assert 'second response' == socket.send_and_recv('AQIDBAUG')
+    assert 'first response' == socket.send_and_recv('AQIDBA==AwQ=')
+    assert 'second response' == socket.send_and_recv('AQIDBAUGBQY=')
 
 
 def assert_stubbed_service(imposter_client, port, expectations):
