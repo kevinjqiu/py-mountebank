@@ -27,7 +27,7 @@ class http_response(object):
     @property
     def json(self):
         result = {}
-        for field in ['status_code', 'headers', 'body', 'mode']:
+        for field in self.__slots__:
             value = getattr(self, field)
             if value is not undefined:
                 json_field = self.MAPPINGS.get(field, field)
