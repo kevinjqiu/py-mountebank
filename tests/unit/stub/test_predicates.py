@@ -1,5 +1,5 @@
 import pytest
-from mountebank.stub.predicates import _Predicate, HTTPRequest as http_request
+from mountebank.stub.predicates import _Predicate, http_request
 
 
 def test_build_predicate_equals():
