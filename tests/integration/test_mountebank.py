@@ -1,5 +1,7 @@
 import requests
 import pytest
+import six
+
 from docker import errors as docker_errors
 from mountebank import (
     MountebankClient, ImposterException,
@@ -281,5 +283,5 @@ def test_imposter_with_ends_with_predicate(imposter_client, socket_factory):
 
 def assert_stubbed_service(imposter_client, port, expectations):
     imposter = imposter_client.get_by_port(port)
-    for key, value in expectations.iteritems():
+    for key, value in six.iteritems(expectations):
         assert imposter[key] == value

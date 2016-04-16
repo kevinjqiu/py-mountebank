@@ -1,3 +1,5 @@
+import six
+
 from collections import namedtuple
 
 
@@ -50,7 +52,7 @@ class Predicates(object):
 
         return {
             'predicates': [
-                {k: v} for k, v in self._predicates.iteritems()]
+                {k: v} for k, v in six.iteritems(self._predicates)]
         }
 
 
