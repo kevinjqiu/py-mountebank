@@ -10,7 +10,7 @@ Overview
     * - docs
       - |docs|
     * - tests
-      - | |travis| |appveyor| |requires|
+      - | |travis| |appveyor| |codeship| |requires|
         | |coveralls| |codecov|
         | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
@@ -28,6 +28,9 @@ Overview
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/kevinjqiu/py-mountebank
 
+.. |codeship| image:: https://codeship.com/projects/654c5080-e60a-0133-013c-060b11b22fb9/status?branch=master
+    :alt Codeship Build Status
+    :target: https://codeship.com/projects/146701
 .. |requires| image:: https://requires.io/github/kevinjqiu/py-mountebank/requirements.svg?branch=master
     :alt: Requirements Status
     :target: https://requires.io/github/kevinjqiu/py-mountebank/requirements/?branch=master
