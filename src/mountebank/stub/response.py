@@ -1,12 +1,7 @@
 from collections import namedtuple
 
 
-class _Sentinel(object):
-    """Act as sentinel object
-    """
-
-
-undefined = _Sentinel()
+undefined = type('_Sentinel', (object,), {})
 
 
 class http_response(object):
