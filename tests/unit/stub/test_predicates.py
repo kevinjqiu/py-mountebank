@@ -38,6 +38,6 @@ def test_build_predicate_exists():
     assert expected == http_request.path.exists(True)
 
 
-def test_build_predicate_exists_must_be_called_with_boolean():
-    with pytest.raises(AssertionError):
-        http_request.path.exists('True')
+# def test_build_predicate_exists_must_be_called_with_boolean():
+#     with pytest.raises(AssertionError):
+#         http_request.path.exists('True')

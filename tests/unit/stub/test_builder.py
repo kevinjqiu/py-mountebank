@@ -46,14 +46,12 @@ def test_build_response_with_multiple_responses(stub_builder):
             }
         }]
     }
-    stub_builder.build()
     assert expected == stub_builder.build()
 
 
 def test_build_response_with_predicate(stub_builder):
     stub_builder.when(http_request.body == 'OK') \
         .response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK'}}],
                 'responses': [{'is': {'statusCode': 200}}]}
     assert expected == stub_builder.build()
@@ -64,7 +62,6 @@ def test_build_response_with_multiple_predicates(stub_builder):
         http_request.body == 'OK',
         http_request.path == '/foo'
     ).response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [{'equals': {'body': 'OK',
                                            'path': '/foo'}}],
                 'responses': [{'is': {'statusCode': 200}}]}
@@ -76,7 +73,6 @@ def test_build_response_with_multiple_different_predicates(stub_builder):
         http_request.method == 'POST',
         http_request.body.contains('duh')
     ).response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [
         {'contains': {'body': 'duh'}},
         {'equals': {'method': 'POST'}}],
@@ -87,7 +83,6 @@ def test_build_response_with_multiple_different_predicates(stub_builder):
 def test_build_response_with_not_predicate(stub_builder):
     stub_builder.when(not_(http_request.method == 'POST')) \
         .response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [
         {'not': {'equals': {'method': 'POST'}}}],
         'responses': [{'is': {'statusCode': 200}}]}
@@ -99,7 +94,6 @@ def test_build_response_with_and_predicate(stub_builder):
                            http_request.path == '/begin',
                            http_request.body.startswith('duh'))
                       ).response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [
         {'and': {'equals': {'method': 'POST',
                             'path': '/begin'},
@@ -116,7 +110,6 @@ def test_build_response_with_or_predicate(stub_builder):
                            http_request.path == '/begin',
                            http_request.body.startswith('duh'))
                       ).response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [
         {'or': {'equals': {'method': 'POST',
                             'path': '/begin'},
@@ -134,7 +127,6 @@ def test_build_response_with_nested_predicates(stub_builder):
                               http_request.path == '/begin',
                               http_request.body.startswith('duh')))
                       ).response.is_(http_response(status_code=200))
-    stub_builder.build()
     expected = {'predicates': [
         {'or': {'equals': {'method': 'POST'},
                 'and': {'equals': {'path': '/begin'},
@@ -144,4 +136,30 @@ def test_build_response_with_nested_predicates(stub_builder):
          }
     ],
         'responses': [{'is': {'statusCode': 200}}]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_exists_predicates(stub_builder):
+    stub_builder.when(http_request.query.exists('q'),
+                      http_request.query.exists('search', False),
+                      http_request.headers.exists('Accept'),
+                      http_request.headers.exists('X-Rate-Limit', False)
+                      ).response.is_(http_response(status_code=200))
+
+    expected = {
+        'responses': [{'is': {'statusCode': 200}}],
+        'predicates': [
+            {
+                'exists': {
+                    'query': {
+                        'q': True,
+                        'search': False,
+                    },
+                    'headers': {
+                        'Accept': True,
+                        'X-Rate-Limit': False,
+                    }
+                }
+            }
+        ]}
     assert expected == stub_builder.build()
