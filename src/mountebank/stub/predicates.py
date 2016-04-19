@@ -81,9 +81,8 @@ class PredicateBuilder(object):
     def matches(self, value):
         return _Predicate('matches', self._field_name, value)
 
-    def exists(self, value):
-        assert type(value) == bool, 'exists() must be called with True/False'
-        return _Predicate('exists', self._field_name, value)
+    def exists(self, subkey, value=True):
+        return _Predicate('exists', self._field_name, {subkey: value})
 
 
 def not_(predicate):
@@ -105,6 +104,10 @@ class http_request(object):
     method = PredicateBuilder('method')
     headers = PredicateBuilder('headers')
     body = PredicateBuilder('body')
+
+    @classmethod
+    def exists(cls, subkey, value=True):
+        return _Predicate('exists', subkey, value)
 
 
 class tcp_request(object):

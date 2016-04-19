@@ -314,34 +314,46 @@ def test_imposter_with_matches_predicate(imposter_client, socket_factory):
     assert 'second response' == socket.send_and_recv('second request')
 
 
-# def test_imposter_with_exists_predicate(imposter_client):
-#     imposter_client.delete(65000)
+def test_imposter_with_exists_predicate(imposter_client):
+    imposter_client.delete(65000)
 
-#     stubs = []
-#     stubs.append(
-#         imposter_client.new_stub_builder()
-#         .when(http_request.query.exists('q'),
-#               http_request.query.exists('search'))
-#         .response.is_(http_response(200, headers={'Accept': true,
-#                                                   'X-Rate-Limit': false}))
-#         .build()
-#     )
+    stubs = []
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.query.exists('q'),
+              http_request.query.exists('search', False),
+              http_request.headers.exists('Accept'),
+              http_request.headers.exists('X-Rate-Limit', False))
+        .response.is_(http_response(200, body='first response'))
+        .build()
+    )
 
-#     stubs.append(
-#         imposter_client.new_stub_builder()
-#         .when(http_request.query.exists('method'),
-#               http_request.query.exists('search'))
-#         .response.is_(http_response(200, headers={'Accept': true,
-#                                                   'X-Rate-Limit': false}))
-#         .build()
-#     )
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.exists('method'),
+              http_request.exists('body', False))
+        .response.is_(http_response(200, body='second response'))
+        .build()
+    )
 
-#     imposter_client.create('sample', 'tcp', 65000, {'mode': 'text'},
-#                            stubs=stubs)
+    stubs.append(
+        imposter_client.new_stub_builder()
+        .when(http_request.exists('body'))
+        .response.is_(http_response(200, body='third response'))
+        .build()
+    )
 
-#     socket = socket_factory('localhost', 65000)
-#     assert 'first response' == socket.send_and_recv('first second')
-#     assert 'second response' == socket.send_and_recv('second request')
+    imposter_client.create('sample', 'http', 65000, stubs=stubs)
+
+    response = requests.get('http://localhost:65000/?q=mountebank',
+                            headers={'Accept': 'text/plain'})
+    assert 'first response' == response.text
+
+    response = requests.get('http://localhost:65000/')
+    assert 'second response' == response.text
+
+    response = requests.get('http://localhost:65000/', data='non-empty body')
+    assert 'third response' == response.text
 
 
 def assert_stubbed_service(imposter_client, port, expectations):
