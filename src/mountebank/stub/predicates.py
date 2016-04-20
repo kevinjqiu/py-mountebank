@@ -18,7 +18,8 @@ class Predicates(object):
 
     @classmethod
     def _handle_normal_predicate(cls, merged_predicate, predicate):
-        return {predicate.field_name: predicate.value}
+        value = predicate.value
+        return {predicate.field_name: value}
 
     @classmethod
     def _handle_high_order_predicate(cls, merged_predicate, predicate):

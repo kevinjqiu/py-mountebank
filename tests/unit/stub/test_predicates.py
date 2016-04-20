@@ -36,8 +36,3 @@ def test_build_predicate_matches():
 def test_build_predicate_exists():
     expected = _Predicate('exists', 'path', True)
     assert expected == http_request.path.exists(True)
-
-
-# def test_build_predicate_exists_must_be_called_with_boolean():
-#     with pytest.raises(AssertionError):
-#         http_request.path.exists('True')
