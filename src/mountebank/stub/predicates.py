@@ -3,13 +3,21 @@ import six
 from collections import namedtuple
 
 
-_Predicate = namedtuple('_Predicate', ['operator', 'field_name', 'value'])
-
-
-_HighOrderPredicate = namedtuple('HighOrder_Predicate', ['operator', 'operands', 'arity'])
-
-
 _arity = namedtuple('_arity', ['ONE', 'MULTI'])('ONE', 'MULTI')
+
+
+class _Predicate(object):
+    def __init__(self, operator, field_name, value):
+        self.operator = operator
+        self.field_name = field_name
+        self.value = value
+
+
+class _HighOrderPredicate(object):
+    def __init__(self, operator, operands, arity):
+        self.operator = operator
+        self.operands = operands
+        self.arity = arity
 
 
 class Predicates(object):
