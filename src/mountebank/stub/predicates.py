@@ -3,48 +3,68 @@ import six
 from collections import namedtuple
 
 
-_Predicate = namedtuple('_Predicate', ['operator', 'field_name', 'value'])
-
-
-_HighOrderPredicate = namedtuple('HighOrder_Predicate', ['operator', 'operands', 'arity'])
-
-
 _arity = namedtuple('_arity', ['ONE', 'MULTI'])('ONE', 'MULTI')
+
+
+def _recursive_dict_merge(dict_a, dict_b, path=None):
+    if path is None:
+        path = []
+
+    for key in dict_b:
+        if key in dict_a:
+            if isinstance(dict_a[key], dict) and isinstance(dict_b[key], dict):
+                _recursive_dict_merge(dict_a[key], dict_b[key],
+                                      path + [str(key)])
+            elif dict_a[key] == dict_b[key]:
+                pass
+            else:
+                # Cannot merge non-dict of the same key
+                raise RuntimeError(
+                    'Conflict at {}'.format('.'.join(path + [str(key)])))
+        else:
+            dict_a[key] = dict_b[key]
+
+    return dict_a
+
+
+def _merge_predicates(predicates):
+    retval = {}
+    for predicate in predicates:
+        if predicate.operator not in retval:
+            retval[predicate.operator] = {}
+
+        merged_predicate = retval[predicate.operator]
+        merged_predicate = _recursive_dict_merge(merged_predicate, predicate.json())
+
+    return retval
+
+
+class _Predicate(object):
+    def __init__(self, operator, field_name, value):
+        self.operator = operator
+        self.field_name = field_name
+        self.value = value
+
+    def json(self):
+        return {self.field_name: self.value}
+
+
+class _HighOrderPredicate(object):
+    def __init__(self, operator, operands, arity):
+        self.operator = operator
+        self.operands = operands
+        self.arity = arity
+
+    def json(self):
+        return _merge_predicates(self.operands)
 
 
 class Predicates(object):
     def __init__(self):
         self._predicates = {}
 
-    @classmethod
-    def _handle_normal_predicate(cls, merged_predicate, predicate):
-        value = predicate.value
-        return {predicate.field_name: value}
-
-    @classmethod
-    def _handle_high_order_predicate(cls, merged_predicate, predicate):
-        return cls._merge_predicates(predicate.operands)
-
-    @classmethod
-    def _merge_predicates(cls, predicates):
-        retval = {}
-        for predicate in predicates:
-            if predicate.operator not in retval:
-                retval[predicate.operator] = {}
-
-            merged_predicate = retval[predicate.operator]
-            if isinstance(predicate, _Predicate):
-                merged_predicate.update(cls._handle_normal_predicate(
-                    merged_predicate, predicate))
-            elif isinstance(predicate, _HighOrderPredicate):
-                merged_predicate.update(cls._handle_high_order_predicate(
-                    merged_predicate, predicate))
-            else:
-                assert False, 'Argument must be of type Predicate or HighOrderPredicate'
-        return retval
-
     def set_predicates(self, *predicates):
-        self._predicates = self._merge_predicates(predicates)
+        self._predicates = _merge_predicates(predicates)
 
     @property
     def json(self):
