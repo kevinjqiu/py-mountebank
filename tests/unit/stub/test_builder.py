@@ -163,3 +163,42 @@ def test_build_response_with_exists_predicates(stub_builder):
             }
         ]}
     assert expected == stub_builder.build()
+
+
+def test_build_response_with_equals_predicates(stub_builder):
+    stub_builder.when(http_request.method == 'POST',
+                      http_request.path == '/test',
+                      http_request.query == {'first': '1', 'second': '2'},
+                      http_request.headers == {'Accept': 'text/plain'}
+                      ).response.is_(http_response(status_code=400))
+
+    expected = {
+        'responses': [{'is': {'statusCode': 400}}],
+        'predicates': [{
+            'equals': {
+                'method': 'POST',
+                'path': '/test',
+                'query': {
+                    'first': '1',
+                    'second': '2',
+                },
+                'headers': {
+                    'Accept': 'text/plain',
+                }
+            },
+        }]}
+    assert expected == stub_builder.build()
+
+
+def test_build_response_with_deep_equals_predicates(stub_builder):
+    stub_builder.when(http_request.query.deep_equals({})
+                      ).response.is_(http_response(status_code=200, body='first'))
+    expected = {
+        'responses': [{'is': {'body': 'first', 'statusCode': 200}}],
+        'predicates': [{
+            'deepEquals': {
+                'query': {}
+            }
+        }]
+    }
+    assert expected == stub_builder.build()
